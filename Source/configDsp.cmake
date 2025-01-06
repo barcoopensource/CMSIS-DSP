@@ -22,7 +22,7 @@ endif()
 
 if (NEON)
     # Used in arm_vec_math.h
-    target_include_directories(${project} PUBLIC "${DSP}/ComputeLibrary/Include")
+    target_include_directories(${project} PUBLIC $<BUILD_INTERFACE:${DSP}/ComputeLibrary/Include>)
     target_include_directories(${project} PRIVATE "${DSP}/Ne10")
     target_compile_definitions(${project} PUBLIC ARM_MATH_NEON)
 
@@ -30,7 +30,7 @@ endif()
 
 if (NEONEXPERIMENTAL)
     # Used in arm_vec_math.h
-    target_include_directories(${project} PUBLIC "${DSP}/ComputeLibrary/Include")
+    target_include_directories(${project} PUBLIC  $<BUILD_INTERFACE:${DSP}/ComputeLibrary/Include>)
     target_include_directories(${project} PRIVATE "${DSP}/Ne10")
     target_compile_definitions(${project} PUBLIC ARM_MATH_NEON_EXPERIMENTAL)
 endif()

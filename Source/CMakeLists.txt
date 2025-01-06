@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.14)
+cmake_minimum_required (VERSION 3.23)
 cmake_policy(SET CMP0077 NEW)
 project(CMSISDSP)
 
@@ -19,13 +19,14 @@ option(DISABLEFLOAT16 "Disable building float16 kernels" OFF)
 option(HOST "Build for host" OFF)
 option(AUTOVECTORIZE "Prefer autovectorizable code to one using C intrinsics" OFF)
 option(LAXVECTORCONVERSIONS "Lax vector conversions" ON)
-option(NEON_RIFFT_SCALING "Scaling of RIFFT with Neon" ON)
 
 ###########################
 #
 # CMSIS DSP
 #
 ###########################
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(CMSISDSP STATIC)
 
@@ -61,12 +62,48 @@ include(InterpolationFunctions/Config.cmake)
 
 include(WindowFunctions/Config.cmake)
 
+file(GLOB_RECURSE CMSISDSP_HEADERS
+     "${DSP}/Include/*.h"
+)
+
+include(GNUInstallDirs)
+
 ### Includes
-target_include_directories(CMSISDSP PUBLIC "${DSP}/Include")
+target_include_directories(CMSISDSP PUBLIC
+    "$<BUILD_INTERFACE:${DSP}/Include>"
+    "$<INSTALL_INTERFACE:include>"
+)
+
+set(BUILD_INCLUDE_DIRS "${DSP}/Include")
 if (DEFINED CMSISCORE)
-target_include_directories(CMSISDSP PUBLIC "${CMSISCORE}/Include")
+    list(APPEND BUILD_INCLUDE_DIRS "${CMSISCORE}")
 endif()
+
+target_sources(
+    CMSISDSP
+    PUBLIC
+    FILE_SET HEADERS
+        BASE_DIRS "${DSP}/Include"
+        FILES "${CMSISDSP_HEADERS}"
+)
+
+target_include_directories(CMSISDSP PUBLIC
+    "$<BUILD_INTERFACE:${BUILD_INCLUDE_DIRS}>"
+    "$<INSTALL_INTERFACE:include/cmsis>"
+)
 
 include(configDsp.cmake)
 
 configDsp(CMSISDSP)
+
+install(TARGETS CMSISDSP
+    EXPORT cmsisTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cmsis
+)
+
+install(EXPORT cmsisTargets
+    FILE CMSISDSPConfig.cmake
+    NAMESPACE CMSIS::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CMSISDSP
+)

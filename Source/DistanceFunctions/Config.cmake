@@ -30,7 +30,7 @@ target_sources(CMSISDSP PRIVATE DistanceFunctions/arm_dtw_path_f32.c)
 target_sources(CMSISDSP PRIVATE DistanceFunctions/arm_dtw_init_window_q7.c)
 
 
-target_include_directories(CMSISDSP PRIVATE "DistanceFunctions")
+target_include_directories(CMSISDSP PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/DistanceFunctions>)
 
 if ((NOT ARMAC5) AND (NOT DISABLEFLOAT16))
 target_sources(CMSISDSP PRIVATE DistanceFunctions/arm_braycurtis_distance_f16.c)
