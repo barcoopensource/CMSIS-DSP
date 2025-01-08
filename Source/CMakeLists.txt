@@ -62,11 +62,35 @@ include(InterpolationFunctions/Config.cmake)
 include(WindowFunctions/Config.cmake)
 
 ### Includes
-target_include_directories(CMSISDSP PUBLIC "${DSP}/Include")
+target_include_directories(CMSISDSP PUBLIC
+    "$<BUILD_INTERFACE:${DSP}/Include>"
+    "$<INSTALL_INTERFACE:include>"
+)
 if (DEFINED CMSISCORE)
-target_include_directories(CMSISDSP PUBLIC "${CMSISCORE}/Include")
+target_include_directories(CMSISDSP PUBLIC
+    "$<BUILD_INTERFACE:${CMSISCORE}>"
+    "$<INSTALL_INTERFACE:include>"
+)
 endif()
 
 include(configDsp.cmake)
 
 configDsp(CMSISDSP)
+
+file(GLOB_RECURSE CMSISDSP_HEADERS
+     "${DSP}/Include/*.h"
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${CMSISDSP_HEADERS}")
+
+install(TARGETS CMSISDSP
+    EXPORT cmsisTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cmsis
+)
+
+install(EXPORT cmsisTargets
+    FILE CMSISDSPConfig.cmake
+    NAMESPACE CMSIS::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CMSISDSP
+)
