@@ -27,6 +27,8 @@ option(NEON_RIFFT_SCALING "Scaling of RIFFT with Neon" ON)
 #
 ###########################
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 add_library(CMSISDSP STATIC)
 
 include(BasicMathFunctions/Config.cmake)
